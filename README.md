@@ -52,6 +52,52 @@ Pass `""` for `prefix` to fall back to `doc`.
 - Run tests: `go test ./...`
 - Tidy dependencies: `go mod tidy`
 
+## Python Bindings (pybind11)
+
+This repository now includes a `pybind11` binding that exposes `DocID` to Python via a Go `c-shared` library.
+
+### Prerequisites
+- Go toolchain with CGO enabled
+- CMake (>= 3.18)
+- A C++ compiler
+- Python with `pybind11` installed (`python3 -m pip install pybind11`)
+
+### Build
+
+From the repository root:
+
+```bash
+./python/build.sh
+```
+
+The script performs:
+1. `go build -buildmode=c-shared` to generate `python/.cgo/libidgen.dylib` and header.
+2. CMake build of the Python extension module `_idgen` in `python/build`.
+
+### Use From Python
+
+```python
+import sys
+sys.path.append("python/build")
+
+import _idgen
+
+print(_idgen.doc_id("invoice", "short"))
+print(_idgen.doc_id("invoice", "uuid"))
+```
+
+`doc_id(prefix, format)` maps directly to the Go `DocID(prefix, format)` function.
+
+### Smoke Test
+
+After building, run:
+
+```bash
+python3 python/smoke_test.py
+```
+
+This validates import + basic `DocID` behavior for `short`, `uuid`, and `timestamp` formats.
+
 ## License
 
 MIT License © 2026 William J House
